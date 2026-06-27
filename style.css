@@ -1,0 +1,144 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f1ea;
+  --card: #ffffff;
+  --text: #1f2933;
+  --muted: #697386;
+  --border: #e4dfd4;
+  --accent: #111827;
+  --success: #147d4f;
+  --danger: #b42318;
+  --pending: #8a5a00;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #fff7e5 0, var(--bg) 42%);
+  color: var(--text);
+}
+
+.app {
+  width: min(760px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(31, 41, 51, 0.08);
+  margin-bottom: 18px;
+}
+
+.hero { padding: 32px; }
+.eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: 12px; font-weight: 700; color: var(--muted); margin: 0 0 8px; }
+h1 { font-size: clamp(32px, 7vw, 58px); line-height: .95; margin: 0 0 12px; }
+h2 { margin: 0; font-size: 28px; line-height: 1.15; }
+.muted { color: var(--muted); }
+.hidden { display: none; }
+
+.goal-form { margin-top: 28px; display: grid; gap: 12px; }
+label, .label { font-weight: 700; }
+textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  font: inherit;
+  color: var(--text);
+  outline: none;
+}
+textarea:focus { border-color: var(--accent); }
+
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+  background: var(--accent);
+  color: white;
+}
+button:hover { transform: translateY(-1px); }
+
+.today-goal { margin-top: 28px; }
+.badge {
+  display: inline-block;
+  margin: 18px 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.badge.pending { background: #fff4d6; color: var(--pending); }
+.badge.done { background: #dcfce7; color: var(--success); }
+.badge.missed { background: #fee4e2; color: var(--danger); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.success { background: var(--success); }
+.danger { background: var(--danger); }
+.secondary { background: #e7e5df; color: var(--text); }
+
+.progress-card { display: grid; gap: 18px; }
+.section-title.compact { align-items: flex-start; }
+.section-title.compact p { max-width: 420px; margin: 0; text-align: right; }
+.streak-panel {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 18px;
+  background: #faf8f3;
+}
+.streak-panel span {
+  min-width: 84px;
+  text-align: center;
+  font-size: 56px;
+  line-height: 1;
+  font-weight: 900;
+}
+.streak-panel p { margin: 2px 0; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center; }
+.stats div { border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
+.stats span { display: block; font-size: 34px; font-weight: 850; }
+.stats p { margin: 4px 0 0; color: var(--muted); }
+
+.section-title { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.section-title h2 { font-size: 22px; }
+.link-button { background: transparent; color: var(--danger); padding: 8px; }
+.history { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 10px; }
+.history li {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+}
+.history time { color: var(--muted); font-size: 14px; }
+.history strong { font-size: 17px; }
+
+@media (max-width: 560px) {
+  .app { padding: 18px 0; }
+  .hero, .card { padding: 20px; border-radius: 20px; }
+  .stats { grid-template-columns: 1fr; }
+  .section-title.compact { display: block; }
+  .section-title.compact p { margin-top: 8px; text-align: left; }
+  .streak-panel { align-items: flex-start; }
+  .streak-panel span { min-width: 64px; font-size: 46px; }
+}
+.history li.empty-day {
+  background: #faf8f3;
+  border-style: dashed;
+}
+.history li.empty-day strong {
+  color: var(--muted);
+  font-weight: 600;
+}

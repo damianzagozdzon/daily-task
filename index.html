@@ -1,346 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <title>Dzisiejsze jedno zadanie</title>
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f4f4f5;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      background: #ffffff;
-      margin-top: 40px;
-      padding: 24px 28px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-      max-width: 520px;
-      width: 100%;
-    }
-    h1 {
-      font-size: 22px;
-      margin: 0 0 4px;
-    }
-    h2 {
-      margin-top: 32px;
-      font-size: 18px;
-    }
-    .subtitle {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 20px;
-    }
-    label {
-      font-size: 13px;
-      color: #4b5563;
-      display: block;
-      margin-bottom: 6px;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid #d1d5db;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    .row {
-      display: flex;
-      gap: 8px;
-      margin-top: 14px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    button {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 13px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-    }
-    .primary {
-      background: #2563eb;
-      color: white;
-    }
-    .secondary {
-      background: #e5e7eb;
-      color: #374151;
-    }
-    .status {
-      margin-top: 18px;
-      font-size: 13px;
-      color: #4b5563;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-    .badge {
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .done { background: #dcfce7; color: #166534; }
-    .not-done { background: #fee2e2; color: #b91c1c; }
-    .none { background: #e5e7eb; color: #4b5563; }
-
-    #historyList, #summaryBox, #streakBox {
-      font-size: 13px;
-      color: #374151;
-      margin-top: 8px;
-    }
-    .history-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 6px;
-      gap: 8px;
-    }
-    .history-date { font-weight: 600; }
-    .history-task { flex: 1; }
-    .history-status { font-style: italic; white-space: nowrap; }
-
-    .summary-item { margin-bottom: 4px; }
-    .streak-number {
-      font-size: 24px;
-      font-weight: 700;
-      color: #2563eb;
-      margin-top: 4px;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jeden cel dziennie</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Dzisiejsze jedno zadanie</h1>
-    <div class="subtitle">Wpisz tylko jedną rzecz, która dziś jest najważniejsza.</div>
+  <main class="app">
+    <section class="card hero">
+      <p class="eyebrow">Dzisiaj</p>
+      <h1>Jeden najważniejszy cel</h1>
+      <p id="todayDate" class="muted"></p>
 
-    <label for="taskInput">Najważniejsze zadanie na dziś</label>
-    <input id="taskInput" type="text" placeholder="Np. Zadzwonić do klienta X" />
+      <form id="goalForm" class="goal-form">
+        <label for="goalInput">Co jest dziś najważniejsze?</label>
+        <textarea id="goalInput" rows="3" maxlength="220" placeholder="Np. Dokończyć ofertę dla klienta"></textarea>
+        <button type="submit">Zapisz cel</button>
+      </form>
 
-    <div class="row">
-      <button class="primary" id="saveTaskBtn">Zapisz na dziś</button>
-      <button class="secondary" id="clearTaskBtn">Wyczyść</button>
-    </div>
+      <div id="todayGoal" class="today-goal hidden">
+        <p class="label">Twój cel:</p>
+        <h2 id="goalText"></h2>
+        <div id="statusBadge" class="badge pending">Do rozliczenia wieczorem</div>
+        <div class="actions">
+          <button id="doneBtn" class="success">Zrobione</button>
+          <button id="missedBtn" class="danger">Niezrobione</button>
+          <button id="editBtn" class="secondary">Edytuj</button>
+        </div>
+      </div>
+    </section>
 
-    <div class="status">
-      <span>Stan na dziś:</span>
-      <span id="statusBadge" class="badge none">Brak</span>
-    </div>
-    <div class="row" style="margin-top: 10px;">
-      <button class="secondary" id="markDoneBtn">Oznacz jako zrobione</button>
-      <button class="secondary" id="markNotDoneBtn">Oznacz jako niezrobione</button>
-    </div>
+    <section class="card progress-card">
+      <div class="section-title compact">
+        <h2>Postępy</h2>
+        <p id="progressSummary" class="muted">Zacznij od zapisania dzisiejszego celu.</p>
+      </div>
 
-    <div class="date" id="dateInfo"></div>
+      <div class="streak-panel">
+        <span id="streakCount">0</span>
+        <div>
+          <p class="label">dni z rzędu</p>
+          <p class="muted">Tyle kolejnych dni zakończyło się statusem „zrobione”.</p>
+        </div>
+      </div>
 
-    <h2>Streak — ile dni z rzędu?</h2>
-    <div id="streakBox">
-      <div class="streak-number" id="streakNumber">0</div>
-      <div>dni z rzędu wykonanych zadań</div>
-    </div>
+      <div class="stats">
+        <div>
+          <span id="doneCount">0</span>
+          <p>Zrobione</p>
+        </div>
+        <div>
+          <span id="missedCount">0</span>
+          <p>Niezrobione</p>
+        </div>
+        <div>
+          <span id="completionRate">0%</span>
+          <p>Skuteczność 7 dni</p>
+        </div>
+      </div>
+    </section>
 
-    <h2>Podsumowanie ostatnich 7 dni</h2>
-    <div id="summaryBox"></div>
+    <section class="card">
+      <div class="section-title">
+        <h2>Historia 7 dni</h2>
+        <button id="clearBtn" class="link-button">Wyczyść dane</button>
+      </div>
+      <ul id="historyList" class="history"></ul>
+      <p id="emptyHistory" class="muted">Brak zapisanych celów z ostatnich 7 dni.</p>
+    </section>
+  </main>
 
-    <h2>Historia ostatnich 7 dni</h2>
-    <div id="historyList"></div>
-  </div>
-
-  <script>
-    const STORAGE_KEY = "dailyFocus";
-
-    function getTodayKey() {
-      const today = new Date();
-      const y = today.getFullYear();
-      const m = String(today.getMonth() + 1).padStart(2, "0");
-      const d = String(today.getDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;
-    }
-
-    function loadData() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const data = raw ? JSON.parse(raw) : {};
-      const todayKey = getTodayKey();
-      return { data, todayKey, todayEntry: data[todayKey] || null };
-    }
-
-    function saveToday(task, status) {
-      const { data, todayKey } = loadData();
-      data[todayKey] = {
-        task: task,
-        status: status || "none",
-        updatedAt: new Date().toISOString()
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
-
-    function setStatusBadge(status) {
-      const statusBadge = document.getElementById("statusBadge");
-      statusBadge.className = "badge " + (status || "none");
-
-      if (status === "done") statusBadge.textContent = "Zrobione";
-      else if (status === "not-done") statusBadge.textContent = "Niezrobione";
-      else statusBadge.textContent = "Brak";
-    }
-
-    function loadHistory() {
-      const { data } = loadData();
-      const historyList = document.getElementById("historyList");
-      historyList.innerHTML = "";
-
-      const today = new Date();
-
-      for (let i = 0; i < 7; i++) {
-        const day = new Date(today);
-        day.setDate(today.getDate() - i);
-
-        const y = day.getFullYear();
-        const m = String(day.getMonth() + 1).padStart(2, "0");
-        const d = String(day.getDate()).padStart(2, "0");
-        const key = `${y}-${m}-${d}`;
-
-        const entry = data[key];
-
-        const statusText =
-          entry?.status === "done"
-            ? "✔️ Zrobione"
-            : entry?.status === "not-done"
-            ? "❌ Niezrobione"
-            : "—";
-
-        const taskText = entry?.task ? entry.task : "(brak zadania)";
-
-        const row = document.createElement("div");
-        row.className = "history-row";
-
-        row.innerHTML = `
-          <span class="history-date">${key}</span>
-          <span class="history-task">${taskText}</span>
-          <span class="history-status">${statusText}</span>
-        `;
-
-        historyList.appendChild(row);
-      }
-    }
-
-    function calculateStreak() {
-      const { data } = loadData();
-      let streak = 0;
-
-      const today = new Date();
-
-      for (let i = 0; ; i++) {
-        const day = new Date(today);
-        day.setDate(today.getDate() - i);
-
-        const y = day.getFullYear();
-        const m = String(day.getMonth() + 1).padStart(2, "0");
-        const d = String(day.getDate()).padStart(2, "0");
-        const key = `${y}-${m}-${d}`;
-
-        const entry = data[key];
-
-        if (!entry || entry.status !== "done") break;
-
-        streak++;
-      }
-
-      document.getElementById("streakNumber").textContent = streak;
-    }
-
-    function calculateSummary() {
-      const { data } = loadData();
-      const summaryBox = document.getElementById("summaryBox");
-
-      let done = 0;
-      let notDone = 0;
-      let none = 0;
-
-      const today = new Date();
-
-      for (let i = 0; i < 7; i++) {
-        const day = new Date(today);
-        day.setDate(today.getDate() - i);
-
-        const y = day.getFullYear();
-        const m = String(day.getMonth() + 1).padStart(2, "0");
-        const d = String(day.getDate()).padStart(2, "0");
-        const key = `${y}-${m}-${d}`;
-
-        const entry = data[key];
-
-        if (!entry || entry.status === "none") none++;
-        else if (entry.status === "done") done++;
-        else if (entry.status === "not-done") notDone++;
-      }
-
-      summaryBox.innerHTML = `
-        <div class="summary-item">✔️ Zrobione: <strong>${done}</strong></div>
-        <div class="summary-item">❌ Niezrobione: <strong>${notDone}</strong></div>
-        <div class="summary-item">— Brak zadania: <strong>${none}</strong></div>
-      `;
-    }
-
-    function updateUI() {
-      const { todayKey, todayEntry } = loadData();
-      const taskInput = document.getElementById("taskInput");
-      document.getElementById("dateInfo").textContent = `Dziś: ${todayKey}`;
-
-      if (todayEntry) {
-        taskInput.value = todayEntry.task || "";
-        setStatusBadge(todayEntry.status || "none");
-      } else {
-        taskInput.value = "";
-        setStatusBadge("none");
-      }
-
-      loadHistory();
-      calculateStreak();
-      calculateSummary();
-    }
-
-    document.getElementById("saveTaskBtn").addEventListener("click", () => {
-      const task = document.getElementById("taskInput").value.trim();
-      if (!task) return alert("Wpisz najpierw zadanie.");
-      const { todayEntry } = loadData();
-      saveToday(task, todayEntry?.status || "none");
-      updateUI();
-    });
-
-    document.getElementById("clearTaskBtn").addEventListener("click", () => {
-      const { data, todayKey } = loadData();
-      delete data[todayKey];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      updateUI();
-    });
-
-    document.getElementById("markDoneBtn").addEventListener("click", () => {
-      const task = document.getElementById("taskInput").value.trim();
-      if (!task) return alert("Najpierw wpisz i zapisz zadanie.");
-      saveToday(task, "done");
-      updateUI();
-    });
-
-    document.getElementById("markNotDoneBtn").addEventListener("click", () => {
-      const task = document.getElementById("taskInput").value.trim();
-      if (!task) return alert("Najpierw wpisz i zapisz zadanie.");
-      saveToday(task, "not-done");
-      updateUI();
-    });
-
-    updateUI();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
