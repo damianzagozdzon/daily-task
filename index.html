@@ -3,72 +3,124 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jeden cel dziennie</title>
+  <title>Mój jeden cel</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="app">
-    <section class="card hero">
-      <p class="eyebrow">Dzisiaj</p>
-      <h1>Jeden najważniejszy cel</h1>
-      <p id="todayDate" class="muted"></p>
-
-      <form id="goalForm" class="goal-form">
-        <label for="goalInput">Co jest dziś najważniejsze?</label>
-        <textarea id="goalInput" rows="3" maxlength="220" placeholder="Np. Dokończyć ofertę dla klienta"></textarea>
-        <button type="submit">Zapisz cel</button>
-      </form>
-
-      <div id="todayGoal" class="today-goal hidden">
-        <p class="label">Twój cel:</p>
-        <h2 id="goalText"></h2>
-        <div id="statusBadge" class="badge pending">Do rozliczenia wieczorem</div>
-        <div class="actions">
-          <button id="doneBtn" class="success">Zrobione</button>
-          <button id="missedBtn" class="danger">Niezrobione</button>
-          <button id="editBtn" class="secondary">Edytuj</button>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">◎</div>
+        <div>
+          <h1>Mój jeden cel</h1>
+          <p>Skup się na tym, co najważniejsze. Każdego dnia.</p>
         </div>
       </div>
+      <div class="storage-pill" title="Dane są zapisane lokalnie w tej przeglądarce">
+        ☁︎ <span>Dane zapisane lokalnie<br />w tej przeglądarce</span>
+      </div>
+    </header>
+
+    <section class="layout">
+      <div class="left-column">
+        <section class="card goal-card">
+          <div class="section-heading">
+            <span class="heading-icon sun">☀</span>
+            <div>
+              <h2>Dzisiejszy cel</h2>
+              <p>Wpisz jedną najważniejszą rzecz do zrobienia dzisiaj.</p>
+            </div>
+          </div>
+
+          <form id="goalForm" class="goal-form">
+            <textarea id="goalInput" rows="3" maxlength="160" placeholder="Np. Pracować nad projektem aplikacji"></textarea>
+            <button class="primary-btn" type="submit">▣ Zapisz cel</button>
+          </form>
+
+          <div id="todayState" class="today-state hidden">
+            <div>
+              <p class="eyebrow">Twój cel na dziś</p>
+              <strong id="todayGoalText"></strong>
+            </div>
+            <span id="todayBadge" class="badge neutral">Nie oceniono</span>
+          </div>
+
+          <div class="actions">
+            <button id="doneBtn" class="success-btn" type="button">✓ Zrobione</button>
+            <button id="missedBtn" class="danger-btn" type="button">✕ Niezrobione</button>
+          </div>
+        </section>
+
+        <section class="card history-card">
+          <div class="section-heading row-heading">
+            <div class="inline-heading">
+              <span class="heading-icon blue">▣</span>
+              <h2>Historia <span>(ostatnie 7 dni)</span></h2>
+            </div>
+            <button id="clearBtn" class="ghost-btn" type="button">Wyczyść dane</button>
+          </div>
+
+          <div class="history-table" aria-live="polite">
+            <div class="history-header">
+              <span>Dzień</span>
+              <span>Cel</span>
+              <span>Status</span>
+            </div>
+            <div id="historyList"></div>
+          </div>
+          <p class="hint">Kliknij status dnia, aby zmienić go na zrobione / niezrobione / nie oceniono.</p>
+        </section>
+      </div>
+
+      <aside class="right-column">
+        <section class="card streak-card">
+          <div class="section-heading">
+            <span class="heading-icon fire">🔥</span>
+            <h2>Seria <span>(dni z rzędu)</span></h2>
+          </div>
+          <div class="streak-number" id="streakCount">0</div>
+          <p class="streak-label">dni z rzędu!</p>
+          <p id="streakMessage" class="muted center">Zacznij od pierwszego wykonanego dnia.</p>
+          <div id="weekDots" class="week-dots"></div>
+        </section>
+
+        <section class="card summary-card">
+          <div class="section-heading">
+            <span class="heading-icon blue">▥</span>
+            <h2>Podsumowanie <span>(ostatnie 7 dni)</span></h2>
+          </div>
+
+          <div class="summary-grid">
+            <div class="donut" id="donutChart"><span id="doneRatio">0/7</span><small>zrobione</small></div>
+            <div class="summary-list">
+              <div><i class="dot done"></i><span>Zrobione</span><strong id="doneCount">0</strong></div>
+              <div><i class="dot missed"></i><span>Niezrobione</span><strong id="missedCount">0</strong></div>
+              <div><i class="dot open"></i><span>Nie oceniono</span><strong id="openCount">0</strong></div>
+            </div>
+          </div>
+
+          <div class="progress-block">
+            <div>
+              <strong>Twój postęp</strong>
+              <span>Ostatnie 7 dni</span>
+            </div>
+            <strong id="completionRate">0%</strong>
+          </div>
+          <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
+          <p id="progressSummary" class="muted summary-text">Zapisz pierwszy cel i wróć wieczorem.</p>
+        </section>
+
+        <section class="card reminder-card">
+          <div class="section-heading">
+            <span class="heading-icon blue">💡</span>
+            <h2>Pamiętaj</h2>
+          </div>
+          <p>Małe kroki każdego dnia prowadzą do <strong>wielkich zmian.</strong></p>
+        </section>
+      </aside>
     </section>
 
-    <section class="card progress-card">
-      <div class="section-title compact">
-        <h2>Postępy</h2>
-        <p id="progressSummary" class="muted">Zacznij od zapisania dzisiejszego celu.</p>
-      </div>
-
-      <div class="streak-panel">
-        <span id="streakCount">0</span>
-        <div>
-          <p class="label">dni z rzędu</p>
-          <p class="muted">Tyle kolejnych dni zakończyło się statusem „zrobione”.</p>
-        </div>
-      </div>
-
-      <div class="stats">
-        <div>
-          <span id="doneCount">0</span>
-          <p>Zrobione</p>
-        </div>
-        <div>
-          <span id="missedCount">0</span>
-          <p>Niezrobione</p>
-        </div>
-        <div>
-          <span id="completionRate">0%</span>
-          <p>Skuteczność 7 dni</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="section-title">
-        <h2>Historia 7 dni</h2>
-        <button id="clearBtn" class="link-button">Wyczyść dane</button>
-      </div>
-      <ul id="historyList" class="history"></ul>
-      <p id="emptyHistory" class="muted">Brak zapisanych celów z ostatnich 7 dni.</p>
-    </section>
+    <footer>♡ Skup się na jednym celu. Każdego dnia.</footer>
   </main>
 
   <script src="app.js"></script>
