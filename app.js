@@ -1,5 +1,4 @@
-const STORAGE_KEY = "oneDailyGoal.v2";
-const todayKey = new Date().toLocaleDateString("sv-SE");
+const STORAGE_KEY = "jeden-cel-v2";
 
 const goalForm = document.querySelector("#goalForm");
 const goalInput = document.querySelector("#goalInput");
@@ -22,7 +21,11 @@ const progressSummary = document.querySelector("#progressSummary");
 const donutChart = document.querySelector("#donutChart");
 const doneRatio = document.querySelector("#doneRatio");
 
-function loadGoals() {
+function todayKey() {
+  return new Date().toLocaleDateString("sv-SE");
+}
+
+function readGoals() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
   } catch {
@@ -42,7 +45,15 @@ function lastSevenDays() {
   });
 }
 
-function statusText(status) {
+function niceDate(dateKey) {
+  return new Date(`${dateKey}T12:00:00`).toLocaleDateString("pl-PL", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short"
+  });
+}
+
+function statusLabel(status) {
   if (status === "done") return "Zrobione";
   if (status === "missed") return "Niezrobione";
   return "Nie oceniono";
@@ -51,27 +62,22 @@ function statusText(status) {
 function statusClass(status) {
   if (status === "done") return "done";
   if (status === "missed") return "missed";
-  return "neutral";
-}
-
-function nextStatus(current) {
-  if (!current || current === "open") return "done";
-  if (current === "done") return "missed";
   return "open";
 }
 
-function niceDate(dateKey, index) {
-  if (index === 0) return "Dzisiaj";
-  if (index === 1) return "Wczoraj";
-  return new Date(`${dateKey}T12:00:00`).toLocaleDateString("pl-PL", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  });
+function setStatus(dateKey, status) {
+  const goals = readGoals();
+  if (!goals[dateKey]) return;
+  goals[dateKey].status = status;
+  goals[dateKey].updatedAt = new Date().toISOString();
+  saveGoals(goals);
+  render();
 }
 
-function dayShort(dateKey) {
-  return new Date(`${dateKey}T12:00:00`).toLocaleDateString("pl-PL", { weekday: "short" });
+function nextStatus(status) {
+  if (!status || status === "open") return "done";
+  if (status === "done") return "missed";
+  return "open";
 }
 
 function calculateStreak(goals) {
@@ -80,8 +86,7 @@ function calculateStreak(goals) {
 
   while (true) {
     const key = cursor.toLocaleDateString("sv-SE");
-    const item = goals[key];
-    if (!item || item.status !== "done") break;
+    if (goals[key]?.status !== "done") break;
     streak += 1;
     cursor.setDate(cursor.getDate() - 1);
   }
@@ -89,136 +94,131 @@ function calculateStreak(goals) {
   return streak;
 }
 
-function progressText(done, missed, open, streak) {
-  const settled = done + missed;
-  if (done + missed + open === 0) return "Zapisz pierwszy cel i wróć wieczorem.";
-  if (settled === 0) return "Masz zapisane cele, ale jeszcze żaden dzień nie został rozliczony.";
-  if (streak >= 5) return `Bardzo dobrze: ${streak} dni z rzędu. Pilnuj jutra.`;
-  if (streak >= 2) return `Dobra passa: ${streak} dni z rzędu. Teraz najważniejsze to jej nie przerwać.`;
-  if (done > missed) return `Dobry kierunek: ${done} z ${settled} ocenionych dni zakończone sukcesem.`;
-  if (done === 0) return "Na razie brak wykonanych dni. Ustaw jutro mniejszy i konkretny cel.";
-  return `Masz ${done} wykonane dni. Następny cel: zbudować serię 2 dni.`;
-}
-
 function renderToday(goals) {
-  const today = goals[todayKey];
-  goalInput.value = today?.text || "";
-  todayState.classList.toggle("hidden", !today);
-  doneBtn.disabled = !today;
-  missedBtn.disabled = !today;
+  const goal = goals[todayKey()];
+  if (!goal) {
+    todayState.classList.add("hidden");
+    goalInput.value = "";
+    return;
+  }
 
-  if (!today) return;
-
-  todayGoalText.textContent = today.text;
-  todayBadge.textContent = statusText(today.status);
-  todayBadge.className = `badge ${statusClass(today.status)}`;
+  todayState.classList.remove("hidden");
+  todayGoalText.textContent = goal.text;
+  todayBadge.textContent = statusLabel(goal.status);
+  todayBadge.className = `badge ${statusClass(goal.status) === "open" ? "neutral" : statusClass(goal.status)}`;
+  goalInput.value = goal.text;
 }
 
 function renderHistory(goals) {
   historyList.innerHTML = "";
-  lastSevenDays().forEach((dateKey, index) => {
+
+  lastSevenDays().forEach((dateKey) => {
     const goal = goals[dateKey];
     const row = document.createElement("div");
-    row.className = "history-row";
-    row.innerHTML = `
-      <time>${niceDate(dateKey, index)}</time>
-      <strong>${goal ? "" : "—"}</strong>
-      <button class="status-btn" type="button" ${goal ? "" : "disabled"}>
-        <span class="badge ${statusClass(goal?.status)}">${statusText(goal?.status)}</span>
-      </button>
-    `;
-    row.querySelector("strong").textContent = goal?.text || "—";
-    const statusButton = row.querySelector(".status-btn");
-    statusButton.addEventListener("click", () => {
-      const fresh = loadGoals();
-      if (!fresh[dateKey]) return;
-      fresh[dateKey].status = nextStatus(fresh[dateKey].status);
-      fresh[dateKey].updatedAt = new Date().toISOString();
-      saveGoals(fresh);
-      render();
-    });
+    row.className = `history-row ${goal ? "" : "empty"}`;
+    row.dataset.date = niceDate(dateKey);
+
+    if (!goal) {
+      row.innerHTML = `
+        <span class="history-date">${niceDate(dateKey)}</span>
+        <span class="history-goal">—</span>
+        <span class="status-btn open">Brak celu</span>
+      `;
+    } else {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `status-btn ${statusClass(goal.status)}`;
+      button.textContent = statusLabel(goal.status);
+      button.addEventListener("click", () => setStatus(dateKey, nextStatus(goal.status)));
+
+      row.innerHTML = `
+        <span class="history-date">${niceDate(dateKey)}</span>
+        <span class="history-goal"></span>
+      `;
+      row.querySelector(".history-goal").textContent = goal.text;
+      row.appendChild(button);
+    }
+
     historyList.appendChild(row);
   });
 }
 
-function renderStats(goals) {
+function renderProgress(goals) {
   const days = lastSevenDays();
-  const entries = days.map((dateKey) => goals[dateKey]).filter(Boolean);
-  const done = entries.filter((item) => item.status === "done").length;
-  const missed = entries.filter((item) => item.status === "missed").length;
-  const open = entries.filter((item) => !item.status || item.status === "open").length;
-  const streak = calculateStreak(goals);
-  const settled = done + missed;
-  const rate = settled === 0 ? 0 : Math.round((done / settled) * 100);
-  const donutDegrees = Math.round((done / 7) * 360);
+  let done = 0;
+  let missed = 0;
+  let open = 0;
 
+  days.forEach((dateKey) => {
+    const goal = goals[dateKey];
+    if (goal?.status === "done") done += 1;
+    else if (goal?.status === "missed") missed += 1;
+    else open += 1;
+  });
+
+  const streak = calculateStreak(goals);
+  const rate = Math.round((done / 7) * 100);
+
+  doneCount.textContent = done;
+  missedCount.textContent = missed;
+  openCount.textContent = open;
   streakCount.textContent = streak;
-  streakMessage.textContent = streak ? `Świetna robota. Masz ${streak} ${streak === 1 ? "dzień" : "dni"} serii.` : "Zacznij od pierwszego wykonanego dnia.";
-  doneCount.textContent = `${done} (${Math.round((done / 7) * 100)}%)`;
-  missedCount.textContent = `${missed} (${Math.round((missed / 7) * 100)}%)`;
-  openCount.textContent = `${open} (${Math.round((open / 7) * 100)}%)`;
   completionRate.textContent = `${rate}%`;
   progressBar.style.width = `${rate}%`;
-  progressSummary.textContent = progressText(done, missed, open, streak);
+  donutChart.style.setProperty("--pct", `${rate}%`);
   doneRatio.textContent = `${done}/7`;
-  donutChart.style.background = `conic-gradient(var(--green) 0deg, var(--green) ${donutDegrees}deg, #e8edf4 ${donutDegrees}deg)`;
+
+  if (streak >= 3) {
+    streakMessage.textContent = `Świetna robota. Masz ${streak} dni z rzędu.`;
+  } else if (streak === 1 || streak === 2) {
+    streakMessage.textContent = `Dobry start. Utrzymaj serię jutro.`;
+  } else {
+    streakMessage.textContent = "Zacznij od pierwszego wykonanego dnia.";
+  }
+
+  if (done === 0 && missed === 0) progressSummary.textContent = "Zapisz pierwszy cel i wróć wieczorem, żeby ocenić dzień.";
+  else if (rate >= 70) progressSummary.textContent = "Bardzo dobry tydzień. Trzymaj tempo i nie komplikuj celu.";
+  else if (rate >= 40) progressSummary.textContent = "Jest progres. Wybieraj mniejszy, konkretny cel na jutro.";
+  else progressSummary.textContent = "Najważniejsze: wrócić do rytmu. Jeden prosty cel na jutro wystarczy.";
 
   weekDots.innerHTML = "";
-  [...days].reverse().forEach((dateKey) => {
-    const item = goals[dateKey];
-    const dot = document.createElement("div");
-    dot.className = `week-dot ${statusClass(item?.status)}`;
-    dot.innerHTML = `<i>${item?.status === "missed" ? "✕" : "🔥"}</i><span>${dayShort(dateKey)}</span>`;
+  days.slice().reverse().forEach((dateKey) => {
+    const dot = document.createElement("span");
+    dot.className = `week-dot ${statusClass(goals[dateKey]?.status)}`;
+    dot.textContent = new Date(`${dateKey}T12:00:00`).toLocaleDateString("pl-PL", { weekday: "narrow" });
+    dot.title = `${niceDate(dateKey)}: ${goals[dateKey] ? statusLabel(goals[dateKey].status) : "Brak celu"}`;
     weekDots.appendChild(dot);
   });
 }
 
 function render() {
-  const goals = loadGoals();
+  const goals = readGoals();
   renderToday(goals);
   renderHistory(goals);
-  renderStats(goals);
+  renderProgress(goals);
 }
 
 goalForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = goalInput.value.trim();
-  if (!text) {
-    goalInput.focus();
-    return;
-  }
+  if (!text) return;
 
-  const goals = loadGoals();
-  goals[todayKey] = {
+  const goals = readGoals();
+  const key = todayKey();
+  goals[key] = {
     text,
-    status: goals[todayKey]?.status || "open",
-    createdAt: goals[todayKey]?.createdAt || new Date().toISOString(),
+    status: goals[key]?.status || "open",
+    createdAt: goals[key]?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
   saveGoals(goals);
   render();
 });
 
-doneBtn.addEventListener("click", () => {
-  const goals = loadGoals();
-  if (!goals[todayKey]) return;
-  goals[todayKey].status = "done";
-  goals[todayKey].updatedAt = new Date().toISOString();
-  saveGoals(goals);
-  render();
-});
-
-missedBtn.addEventListener("click", () => {
-  const goals = loadGoals();
-  if (!goals[todayKey]) return;
-  goals[todayKey].status = "missed";
-  goals[todayKey].updatedAt = new Date().toISOString();
-  saveGoals(goals);
-  render();
-});
-
+doneBtn.addEventListener("click", () => setStatus(todayKey(), "done"));
+missedBtn.addEventListener("click", () => setStatus(todayKey(), "missed"));
 clearBtn.addEventListener("click", () => {
-  if (!confirm("Na pewno wyczyścić wszystkie lokalne dane aplikacji?")) return;
+  if (!confirm("Na pewno usunąć wszystkie zapisane cele z tej przeglądarki?")) return;
   localStorage.removeItem(STORAGE_KEY);
   render();
 });

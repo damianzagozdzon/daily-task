@@ -7,122 +7,149 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="app">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-icon" aria-hidden="true">◎</div>
+  <main class="app-shell">
+    <aside class="sidebar">
+      <div class="logo-row">
+        <div class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M24 6l3.9 11.8H40.3L30.2 25l3.9 11.8L24 29.5 13.9 36.8 17.8 25 7.7 17.8h12.4L24 6z"/></svg>
+        </div>
         <div>
           <h1>Mój jeden cel</h1>
-          <p>Skup się na tym, co najważniejsze. Każdego dnia.</p>
+          <p>Lokalny planer dnia</p>
         </div>
       </div>
-      <div class="storage-pill" title="Dane są zapisane lokalnie w tej przeglądarce">
-        ☁︎ <span>Dane zapisane lokalnie<br />w tej przeglądarce</span>
-      </div>
-    </header>
 
-    <section class="layout">
-      <div class="left-column">
-        <section class="card goal-card">
-          <div class="section-heading">
-            <span class="heading-icon sun">☀</span>
+      <nav class="side-nav" aria-label="Nawigacja aplikacji">
+        <a class="active" href="#dzisiaj"><span class="nav-icon target"></span>Dzisiejszy cel</a>
+        <a href="#postepy"><span class="nav-icon chart"></span>Postępy</a>
+        <a href="#historia"><span class="nav-icon calendar"></span>Historia 7 dni</a>
+      </nav>
+
+      <div class="side-illustration" aria-hidden="true">
+        <svg viewBox="0 0 280 210" role="img">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#5ea1ff"/>
+              <stop offset="1" stop-color="#2563eb"/>
+            </linearGradient>
+          </defs>
+          <rect x="18" y="34" width="244" height="142" rx="28" fill="#17233a"/>
+          <rect x="42" y="56" width="118" height="12" rx="6" fill="#34435f"/>
+          <rect x="42" y="82" width="188" height="16" rx="8" fill="#233250"/>
+          <rect x="42" y="113" width="82" height="44" rx="14" fill="url(#g1)"/>
+          <circle cx="194" cy="135" r="28" fill="#5eead4" opacity=".9"/>
+          <path d="M181 135l9 9 19-24" fill="none" stroke="#0f172a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="225" cy="61" r="18" fill="#facc15"/>
+          <path d="M208 88c23 4 38 17 44 39" fill="none" stroke="#60a5fa" stroke-width="8" stroke-linecap="round" opacity=".65"/>
+        </svg>
+      </div>
+
+      <p class="local-note">Dane są zapisane tylko w tej przeglądarce przez localStorage.</p>
+    </aside>
+
+    <section class="main-panel">
+      <header class="hero-card">
+        <div>
+          <p class="eyebrow">Jedna najważniejsza rzecz</p>
+          <h2>Zapisz cel rano, rozlicz go wieczorem.</h2>
+          <p>Prosta aplikacja do budowania konsekwencji bez konta, bazy danych i rozpraszaczy.</p>
+        </div>
+        <div class="hero-graphic" aria-hidden="true">
+          <svg viewBox="0 0 220 150">
+            <rect x="20" y="24" width="180" height="104" rx="26" fill="#eff6ff"/>
+            <rect x="48" y="50" width="92" height="12" rx="6" fill="#bfdbfe"/>
+            <rect x="48" y="73" width="124" height="12" rx="6" fill="#dbeafe"/>
+            <rect x="48" y="96" width="78" height="18" rx="9" fill="#2563eb"/>
+            <circle cx="165" cy="47" r="20" fill="#22c55e"/>
+            <path d="M156 47l7 7 14-17" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </header>
+
+      <div class="content-grid">
+        <section id="dzisiaj" class="card goal-card">
+          <div class="card-heading">
+            <span class="icon-box morning"></span>
             <div>
-              <h2>Dzisiejszy cel</h2>
-              <p>Wpisz jedną najważniejszą rzecz do zrobienia dzisiaj.</p>
+              <h3>Dzisiejszy cel</h3>
+              <p>Wpisz jedną konkretną rzecz do zrobienia.</p>
             </div>
           </div>
 
           <form id="goalForm" class="goal-form">
-            <textarea id="goalInput" rows="3" maxlength="160" placeholder="Np. Pracować nad projektem aplikacji"></textarea>
-            <button class="primary-btn" type="submit">▣ Zapisz cel</button>
+            <textarea id="goalInput" rows="4" maxlength="160" placeholder="Np. Dokończyć pierwszy widok aplikacji"></textarea>
+            <button class="primary-btn" type="submit"><span class="check-icon"></span>Zapisz cel</button>
           </form>
 
           <div id="todayState" class="today-state hidden">
             <div>
-              <p class="eyebrow">Twój cel na dziś</p>
+              <p class="eyebrow small">Cel na dziś</p>
               <strong id="todayGoalText"></strong>
             </div>
             <span id="todayBadge" class="badge neutral">Nie oceniono</span>
           </div>
 
           <div class="actions">
-            <button id="doneBtn" class="success-btn" type="button">✓ Zrobione</button>
-            <button id="missedBtn" class="danger-btn" type="button">✕ Niezrobione</button>
+            <button id="doneBtn" class="success-btn" type="button">Zrobione</button>
+            <button id="missedBtn" class="danger-btn" type="button">Niezrobione</button>
           </div>
         </section>
 
-        <section class="card history-card">
-          <div class="section-heading row-heading">
-            <div class="inline-heading">
-              <span class="heading-icon blue">▣</span>
-              <h2>Historia <span>(ostatnie 7 dni)</span></h2>
+        <aside id="postepy" class="right-stack">
+          <section class="card streak-card">
+            <div class="card-heading compact">
+              <span class="icon-box flame"></span>
+              <div>
+                <h3>Seria</h3>
+                <p>Dni z rzędu</p>
+              </div>
             </div>
-            <button id="clearBtn" class="ghost-btn" type="button">Wyczyść dane</button>
-          </div>
+            <div class="streak-number" id="streakCount">0</div>
+            <p id="streakMessage" class="muted center">Zacznij od pierwszego wykonanego dnia.</p>
+            <div id="weekDots" class="week-dots"></div>
+          </section>
 
-          <div class="history-table" aria-live="polite">
-            <div class="history-header">
-              <span>Dzień</span>
-              <span>Cel</span>
-              <span>Status</span>
+          <section class="card summary-card">
+            <div class="card-heading compact">
+              <span class="icon-box bars"></span>
+              <div>
+                <h3>Podsumowanie</h3>
+                <p>Ostatnie 7 dni</p>
+              </div>
             </div>
-            <div id="historyList"></div>
-          </div>
-          <p class="hint">Kliknij status dnia, aby zmienić go na zrobione / niezrobione / nie oceniono.</p>
-        </section>
+            <div class="summary-content">
+              <div class="donut" id="donutChart"><span id="doneRatio">0/7</span><small>zrobione</small></div>
+              <div class="summary-list">
+                <div><i class="dot done"></i><span>Zrobione</span><strong id="doneCount">0</strong></div>
+                <div><i class="dot missed"></i><span>Niezrobione</span><strong id="missedCount">0</strong></div>
+                <div><i class="dot open"></i><span>Nie oceniono</span><strong id="openCount">0</strong></div>
+              </div>
+            </div>
+            <div class="progress-line"><span id="completionRate">0%</span><div><b id="progressBar"></b></div></div>
+            <p id="progressSummary" class="muted summary-text">Zapisz pierwszy cel i wróć wieczorem.</p>
+          </section>
+        </aside>
       </div>
 
-      <aside class="right-column">
-        <section class="card streak-card">
-          <div class="section-heading">
-            <span class="heading-icon fire">🔥</span>
-            <h2>Seria <span>(dni z rzędu)</span></h2>
-          </div>
-          <div class="streak-number" id="streakCount">0</div>
-          <p class="streak-label">dni z rzędu!</p>
-          <p id="streakMessage" class="muted center">Zacznij od pierwszego wykonanego dnia.</p>
-          <div id="weekDots" class="week-dots"></div>
-        </section>
-
-        <section class="card summary-card">
-          <div class="section-heading">
-            <span class="heading-icon blue">▥</span>
-            <h2>Podsumowanie <span>(ostatnie 7 dni)</span></h2>
-          </div>
-
-          <div class="summary-grid">
-            <div class="donut" id="donutChart"><span id="doneRatio">0/7</span><small>zrobione</small></div>
-            <div class="summary-list">
-              <div><i class="dot done"></i><span>Zrobione</span><strong id="doneCount">0</strong></div>
-              <div><i class="dot missed"></i><span>Niezrobione</span><strong id="missedCount">0</strong></div>
-              <div><i class="dot open"></i><span>Nie oceniono</span><strong id="openCount">0</strong></div>
-            </div>
-          </div>
-
-          <div class="progress-block">
+      <section id="historia" class="card history-card">
+        <div class="history-title">
+          <div class="card-heading compact">
+            <span class="icon-box calendar"></span>
             <div>
-              <strong>Twój postęp</strong>
-              <span>Ostatnie 7 dni</span>
+              <h3>Historia 7 dni</h3>
+              <p>Kliknij status, aby go zmienić.</p>
             </div>
-            <strong id="completionRate">0%</strong>
           </div>
-          <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
-          <p id="progressSummary" class="muted summary-text">Zapisz pierwszy cel i wróć wieczorem.</p>
-        </section>
+          <button id="clearBtn" class="ghost-btn" type="button">Wyczyść dane</button>
+        </div>
 
-        <section class="card reminder-card">
-          <div class="section-heading">
-            <span class="heading-icon blue">💡</span>
-            <h2>Pamiętaj</h2>
-          </div>
-          <p>Małe kroki każdego dnia prowadzą do <strong>wielkich zmian.</strong></p>
-        </section>
-      </aside>
+        <div class="history-table" aria-live="polite">
+          <div class="history-header"><span>Dzień</span><span>Cel</span><span>Status</span></div>
+          <div id="historyList"></div>
+        </div>
+      </section>
     </section>
-
-    <footer>♡ Skup się na jednym celu. Każdego dnia.</footer>
   </main>
-
   <script src="app.js"></script>
 </body>
 </html>
